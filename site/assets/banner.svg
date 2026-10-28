@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+<title id="title">nazukiss nixos-config terminal banner</title><desc id="desc">Dark terminal banner for a NixOS configuration repository.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#102319"/><stop offset="1" stop-color="#080d0b"/></linearGradient><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#214231" stroke-width="1" opacity=".55"/></pattern></defs>
+<rect width="1200" height="300" rx="18" fill="url(#bg)"/><rect width="1200" height="300" rx="18" fill="url(#grid)"/><rect x="35" y="28" width="1130" height="244" rx="10" fill="#0a120d" stroke="#28543b" stroke-width="2"/><path d="M35 70H1165" stroke="#28543b" stroke-width="2"/>
+<circle cx="60" cy="49" r="6" fill="#ed6a5e"/><circle cx="82" cy="49" r="6" fill="#f4bf4f"/><circle cx="104" cy="49" r="6" fill="#61c454"/><text x="130" y="55" fill="#8ba195" font-family="monospace" font-size="16">nazukiss@nixos:~</text>
+<text x="78" y="142" fill="#53f59a" font-family="monospace" font-size="22">$ nix flake show</text><text x="78" y="202" fill="#e3eee7" font-family="monospace" font-weight="700" font-size="48">nixos-config</text><text x="80" y="238" fill="#8ba195" font-family="monospace" font-size="18">NIXOS // DECLARATIVE // REPRODUCIBLE</text><rect x="1085" y="112" width="5" height="100" fill="#53f59a" opacity=".8"/>
+</svg>
