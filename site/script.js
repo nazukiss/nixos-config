@@ -8,7 +8,7 @@
   const branch = cfg.branch || "main";
   const validRepo = Boolean(username && repository && !username.startsWith("YOUR_") && !repository.startsWith("YOUR_"));
   const repoUrl = validRepo ? `https://github.com/${encodeURIComponent(username)}/${encodeURIComponent(repository)}` : "https://github.com/";
-  document.title = `${project} // NIXOS SYSTEM INTERFACE`;
+  document.title = `${project} // INTERFAZ DE NIXOS`;
   setText("[data-project]", project); setText("#project-title", project);
   setText("[data-description]", cfg.description); setText("[data-version]", cfg.version);
   setText("[data-license]", cfg.license); setText("[data-status]", cfg.status);
@@ -101,16 +101,16 @@
       name.setAttribute("aria-label", `${isFolder ? "Carpeta" : "Archivo"}: ${node.path}`);
       const note = document.createElement("span");
       note.className = "tree-note";
-      note.textContent = isFolder ? "DIRECTORY" : "FILE";
+      note.textContent = isFolder ? "CARPETA" : "ARCHIVO";
       row.append(name, note);
       fragment.append(row);
     });
     treeContainer.replaceChildren(fragment);
-    if (treeHeader) treeHeader.textContent = `${rows.length} ENTRIES`;
+    if (treeHeader) treeHeader.textContent = `${rows.length} ELEMENTOS`;
   }
 
   if (!validRepo) {
-    showTreeMessage("Configurá username y repository para cargar la estructura.", true);
+    showTreeMessage("Configurá el usuario y el repositorio para cargar la estructura.", true);
   } else {
     showTreeMessage("Consultando la estructura real del repositorio…");
     fetch(treeUrl, { headers: { Accept: "application/vnd.github+json" } })
@@ -119,7 +119,7 @@
         return response.json();
       })
       .then(data => {
-        if (data.truncated) throw new Error("GitHub devolvió un árbol incompleto por el tamaño del repositorio.");
+        if (data.truncated) throw new Error("GitHub devolvió una estructura incompleta por el tamaño del repositorio.");
         if (!Array.isArray(data.tree)) throw new Error("La respuesta de GitHub no contiene una estructura válida.");
         const files = data.tree.filter(entry => entry.type === "blob").length;
         const folders = data.tree.filter(entry => entry.type === "tree").length;
@@ -132,7 +132,7 @@
         showTreeMessage(`No se pudo cargar el árbol: ${error.message}`, true);
         treeLoadError = error.message;
         renderStats();
-        if (treeHeader) treeHeader.textContent = "UNAVAILABLE";
+        if (treeHeader) treeHeader.textContent = "NO DISPONIBLE";
       });
   }
 
@@ -147,9 +147,9 @@
 
   function renderStats() {
     const cards = [
-      { label: "STARS", value: repoMetadata ? numberFormat.format(repoMetadata.stargazers_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/stargazers` },
-      { label: "FORKS", value: repoMetadata ? numberFormat.format(repoMetadata.forks_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/forks` },
-      { label: "OPEN ISSUES / PRs", value: repoMetadata ? numberFormat.format(repoMetadata.open_issues_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/issues` },
+      { label: "ESTRELLAS", value: repoMetadata ? numberFormat.format(repoMetadata.stargazers_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/stargazers` },
+      { label: "BIFURCACIONES", value: repoMetadata ? numberFormat.format(repoMetadata.forks_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/forks` },
+      { label: "INCIDENCIAS ABIERTAS", value: repoMetadata ? numberFormat.format(repoMetadata.open_issues_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/issues` },
       { label: "ARCHIVOS", value: treeSummary ? numberFormat.format(treeSummary.files) : (treeLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
       { label: "CARPETAS", value: treeSummary ? numberFormat.format(treeSummary.folders) : (treeLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
       { label: "ÚLTIMA ACTUALIZACIÓN", value: repoMetadata ? dateFormat.format(new Date(repoMetadata.pushed_at)) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
@@ -245,7 +245,7 @@
         languageStatus.textContent = `No se pudo cargar la distribución: ${error.message} Podés consultar los lenguajes en GitHub.`;
       });
   } else {
-    languageStatus.textContent = "Configurá username y repository para mostrar estadísticas.";
+    languageStatus.textContent = "Configurá el usuario y el repositorio para mostrar las estadísticas.";
   }
 
   const lines = ["nix flake show","git status","sudo nixos-rebuild switch --flake .#<hostname>"];
