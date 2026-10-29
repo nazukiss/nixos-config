@@ -7,6 +7,32 @@
   const project = cfg.projectName || "nixos-config";
   const branch = cfg.branch || "main";
   const validRepo = Boolean(username && repository && !username.startsWith("YOUR_") && !repository.startsWith("YOUR_"));
+
+  // Caché local para conservar datos y reducir consultas a la API de GitHub.
+  async function fetchGitHubJson(url, cacheKey, ttl = 60 * 60 * 1000) {
+    const storageKey = "nixos-config:" + cacheKey;
+    let cached = null;
+    try { const raw = localStorage.getItem(storageKey); if (raw) cached = JSON.parse(raw); } catch (_) {}
+    if (cached && Date.now() - cached.savedAt < ttl) return cached.data;
+    try {
+      const response = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
+      if (!response.ok) {
+        if (response.status === 403 || response.status === 429) {
+          const remaining = response.headers.get("x-ratelimit-remaining");
+          const reset = Number(response.headers.get("x-ratelimit-reset"));
+          const resetText = reset ? " Probá de nuevo después de las " + new Date(reset * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) + "." : "";
+          throw new Error(remaining === "0" || response.status === 429 ? "GitHub agotó temporalmente el límite de consultas de la API." + resetText : "GitHub rechazó la consulta (HTTP " + response.status + ").");
+        }
+        throw new Error("GitHub respondió con el estado " + response.status + ".");
+      }
+      const data = await response.json();
+      try { localStorage.setItem(storageKey, JSON.stringify({ data, savedAt: Date.now() })); } catch (_) {}
+      return data;
+    } catch (error) {
+      if (cached && cached.data !== undefined) { console.warn("Usando datos guardados para " + cacheKey + " porque la consulta falló:", error); return cached.data; }
+      throw error;
+    }
+  }
   const repoUrl = validRepo ? `https://github.com/${encodeURIComponent(username)}/${encodeURIComponent(repository)}` : "https://github.com/";
   document.title = `${project} // INTERFAZ DE NIXOS`;
   setText("[data-project]", project); setText("#project-title", project);
@@ -113,11 +139,7 @@
     showTreeMessage("Configurá el usuario y el repositorio para cargar la estructura.", true);
   } else {
     showTreeMessage("Consultando la estructura real del repositorio…");
-    fetch(treeUrl, { headers: { Accept: "application/vnd.github+json" } })
-      .then(response => {
-        if (!response.ok) throw new Error(response.status === 403 || response.status === 429 ? "GitHub limitó temporalmente las consultas." : `GitHub respondió con el estado ${response.status}.`);
-        return response.json();
-      })
+    fetchGitHubJson(treeUrl, "tree")
       .then(data => {
         if (data.truncated) throw new Error("GitHub devolvió una estructura incompleta por el tamaño del repositorio.");
         if (!Array.isArray(data.tree)) throw new Error("La respuesta de GitHub no contiene una estructura válida.");
@@ -174,13 +196,7 @@
 
   renderStats();
   if (validRepo) {
-    fetch(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}`, {
-      headers: { Accept: "application/vnd.github+json" }
-    })
-      .then(response => {
-        if (!response.ok) throw new Error(response.status === 403 || response.status === 429 ? "GitHub limitó temporalmente las consultas." : `GitHub respondió con el estado ${response.status}.`);
-        return response.json();
-      })
+    fetchGitHubJson(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}`, "metadata")
       .then(data => {
         repoMetadata = data;
         renderStats();
@@ -201,13 +217,7 @@
   if (cfg.showLanguageStats === false) langCard.hidden = true;
   else if (validRepo) {
     languageStatus.textContent = "Consultando los lenguajes detectados por GitHub…";
-    fetch(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}/languages`, {
-      headers: { Accept: "application/vnd.github+json" }
-    })
-      .then(response => {
-        if (!response.ok) throw new Error(response.status === 403 || response.status === 429 ? "GitHub limitó temporalmente las consultas." : `GitHub respondió con el estado ${response.status}.`);
-        return response.json();
-      })
+    fetchGitHubJson(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}/languages`, "languages")
       .then(languages => {
         const entries = Object.entries(languages).filter(([, bytes]) => Number.isFinite(bytes) && bytes > 0).sort((a, b) => b[1] - a[1]);
         const total = entries.reduce((sum, [, bytes]) => sum + bytes, 0);
