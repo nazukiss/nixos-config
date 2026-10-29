@@ -20,7 +20,7 @@
 
   const sys = cfg.system || {};
   const sysGrid = $("#system-grid");
-  [["OS",sys.os],["DISTRO",sys.distro],["DESKTOP",sys.desktop],["SHELL",sys.shell],["HARDWARE",sys.hardware]].forEach(([label,value]) => {
+  [["SISTEMA",sys.os],["DISTRIBUCIÓN",sys.distro],["ESCRITORIO",sys.desktop],["INTÉRPRETE",sys.shell],["EQUIPO",sys.hardware]].forEach(([label,value]) => {
     const card = document.createElement("div"); card.className = "system-card";
     const small = document.createElement("small"); small.textContent = label;
     const strong = document.createElement("strong"); strong.textContent = value || "Not configured";
