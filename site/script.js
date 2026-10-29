@@ -196,12 +196,57 @@
       });
   }
   const langCard = $("#language-card");
+  const languageChart = $("#language-chart");
+  const languageStatus = $("#language-status");
   if (cfg.showLanguageStats === false) langCard.hidden = true;
   else if (validRepo) {
-    const img = $("#language-image");
-    img.src = `https://github-readme-stats.vercel.app/api/top-langs/?username=${encodeURIComponent(username)}&repo=${encodeURIComponent(repository)}&layout=compact&theme=chartreuse-dark&hide_border=true&bg_color=0d1511&title_color=53f59a&text_color=e3eee7`;
-    img.addEventListener("error", () => { langCard.querySelector("p").textContent = "No se pudo cargar el gráfico externo. El repositorio podría ser privado o el servicio no estar disponible."; img.hidden = true; }, {once:true});
-  } else { langCard.querySelector("p").textContent = "Configurá username y repository para mostrar estadísticas."; $("#language-image").hidden = true; }
+    languageStatus.textContent = "Consultando los lenguajes detectados por GitHub…";
+    fetch(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}/languages`, {
+      headers: { Accept: "application/vnd.github+json" }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error(response.status === 403 || response.status === 429 ? "GitHub limitó temporalmente las consultas." : `GitHub respondió con el estado ${response.status}.`);
+        return response.json();
+      })
+      .then(languages => {
+        const entries = Object.entries(languages).filter(([, bytes]) => Number.isFinite(bytes) && bytes > 0).sort((a, b) => b[1] - a[1]);
+        const total = entries.reduce((sum, [, bytes]) => sum + bytes, 0);
+        languageChart.replaceChildren();
+        if (!entries.length || !total) {
+          languageStatus.textContent = "GitHub todavía no informa lenguajes para este repositorio.";
+          return;
+        }
+        languageStatus.textContent = "Distribución según los bytes de código detectados por GitHub; no representa porcentajes exactos de tiempo o esfuerzo.";
+        entries.forEach(([name, bytes]) => {
+          const percent = bytes / total * 100;
+          const row = document.createElement("div");
+          row.className = "language-row";
+          const meta = document.createElement("div");
+          meta.className = "language-meta";
+          const label = document.createElement("span");
+          label.textContent = name;
+          const value = document.createElement("span");
+          value.textContent = `${percent.toLocaleString("es-AR", { maximumFractionDigits: 1 })}%`;
+          const track = document.createElement("div");
+          track.className = "language-track";
+          track.setAttribute("role", "img");
+          track.setAttribute("aria-label", `${name}: ${percent.toFixed(1)} por ciento`);
+          const bar = document.createElement("div");
+          bar.className = "language-bar";
+          bar.style.width = `${percent}%`;
+          track.append(bar);
+          meta.append(label, value);
+          row.append(meta, track);
+          languageChart.append(row);
+        });
+      })
+      .catch(error => {
+        console.error("No se pudo cargar la distribución de lenguajes:", error);
+        languageStatus.textContent = `No se pudo cargar la distribución: ${error.message} Podés consultar los lenguajes en GitHub.`;
+      });
+  } else {
+    languageStatus.textContent = "Configurá username y repository para mostrar estadísticas.";
+  }
 
   const lines = ["nix flake show","git status","sudo nixos-rebuild switch --flake .#<hostname>"];
   const typed = $("#typed-text");
