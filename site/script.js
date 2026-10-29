@@ -121,7 +121,11 @@
       .then(data => {
         if (data.truncated) throw new Error("GitHub devolvió un árbol incompleto por el tamaño del repositorio.");
         if (!Array.isArray(data.tree)) throw new Error("La respuesta de GitHub no contiene una estructura válida.");
+        const files = data.tree.filter(entry => entry.type === "blob").length;
+        const folders = data.tree.filter(entry => entry.type === "tree").length;
+        treeSummary = { files, folders };
         renderTree(data.tree);
+        renderStats();
       })
       .catch(error => {
         console.error("No se pudo cargar el árbol de GitHub:", error);
@@ -132,12 +136,62 @@
 
   if (cfg.showStats === false) $("#stats").hidden = true;
   const statsGrid = $("#stats-grid");
-  [["REPOSITORY",`${username}/${repository}`,repoUrl],["COMMITS","View commit history ↗",`${repoUrl}/commits/${encodeURIComponent(branch)}`],["ISSUES","Browse issues ↗",`${repoUrl}/issues`]].forEach(([label,value,url]) => {
-    const a = document.createElement("a"); a.className = "stat-card"; a.href = url; a.target = "_blank"; a.rel = "noreferrer";
-    const small = document.createElement("small"); small.textContent = label;
-    const strong = document.createElement("strong"); strong.textContent = value;
-    a.append(small,strong); statsGrid.append(a);
-  });
+  let repoMetadata = null;
+  let treeSummary = null;
+  const numberFormat = new Intl.NumberFormat("es-AR");
+  const dateFormat = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
+
+  function renderStats() {
+    const cards = [
+      { label: "STARS", value: repoMetadata ? numberFormat.format(repoMetadata.stargazers_count) : "Cargando…", url: `${repoUrl}/stargazers` },
+      { label: "FORKS", value: repoMetadata ? numberFormat.format(repoMetadata.forks_count) : "Cargando…", url: `${repoUrl}/forks` },
+      { label: "OPEN ISSUES / PRs", value: repoMetadata ? numberFormat.format(repoMetadata.open_issues_count) : "Cargando…", url: `${repoUrl}/issues` },
+      { label: "ARCHIVOS", value: treeSummary ? numberFormat.format(treeSummary.files) : "Cargando…", url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
+      { label: "CARPETAS", value: treeSummary ? numberFormat.format(treeSummary.folders) : "Cargando…", url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
+      { label: "ÚLTIMA ACTUALIZACIÓN", value: repoMetadata ? dateFormat.format(new Date(repoMetadata.pushed_at)) : "Cargando…", url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
+      { label: "COMMITS", value: "Ver historial ↗", url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
+      { label: "REPOSITORIO", value: `${username}/${repository}`, url: repoUrl }
+    ];
+    statsGrid.replaceChildren();
+    cards.forEach(({ label, value, url }) => {
+      const a = document.createElement("a");
+      a.className = "stat-card";
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noreferrer";
+      const small = document.createElement("small");
+      small.textContent = label;
+      const strong = document.createElement("strong");
+      strong.textContent = value;
+      a.append(small, strong);
+      statsGrid.append(a);
+    });
+  }
+
+  renderStats();
+  if (validRepo) {
+    fetch(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}`, {
+      headers: { Accept: "application/vnd.github+json" }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error(response.status === 403 || response.status === 429 ? "GitHub limitó temporalmente las consultas." : `GitHub respondió con el estado ${response.status}.`);
+        return response.json();
+      })
+      .then(data => {
+        repoMetadata = data;
+        renderStats();
+      })
+      .catch(error => {
+        console.error("No se pudieron cargar las estadísticas de GitHub:", error);
+        statsGrid.querySelectorAll(".stat-card strong").forEach(el => {
+          if (el.textContent === "Cargando…") el.textContent = "No disponible";
+        });
+        const note = document.createElement("p");
+        note.className = "muted stats-error";
+        note.textContent = `No se pudieron cargar algunos datos: ${error.message} Podés consultarlos directamente en GitHub.`;
+        statsGrid.append(note);
+      });
+  }
   const langCard = $("#language-card");
   if (cfg.showLanguageStats === false) langCard.hidden = true;
   else if (validRepo) {
