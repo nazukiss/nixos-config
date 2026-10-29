@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080d0b">
+  <meta name="theme-color" content="#17151f">
   <meta name="description" content="Configuración declarativa de NixOS de Nazukiss.">
   <title>nixos-config // INTERFAZ DE NIXOS</title>
   <link rel="icon" href="assets/banner.svg" type="image/svg+xml">
@@ -22,11 +22,11 @@
   </header>
   <main id="home">
     <section class="hero shell">
-      <div class="eyebrow"><span class="status-dot"></span> SISTEMA EN LÍNEA <span class="muted">/ CONFIGURACIÓN DE NIXOS</span></div>
+      <div class="eyebrow"><span class="status-dot"></span><span>SISTEMA EN LÍNEA</span><span class="eyebrow-divider">·</span><span class="muted">CONFIGURACIÓN DE NIXOS</span></div>
       <p class="overline">CONFIGURACIÓN DECLARATIVA DEL SISTEMA</p>
       <h1>Sistemas reproducibles.<br><span class="accent">Diseñados con claridad.</span></h1>
       <p class="hero-copy" data-description>Configuración declarativa de NixOS, versionada con Git.</p>
-      <div class="typed-line"><span class="green">$</span> <span id="typed-text">nix flake show</span><span class="cursor" aria-hidden="true"></span></div>
+      <div class="command-chip"><span class="command-symbol">$</span><span id="typed-text">nix flake show</span><span class="cursor" aria-hidden="true"></span></div>
       <div class="hero-actions">
         <a class="button primary" data-repo-link href="https://github.com/nazukiss/nixos-config" target="_blank" rel="noreferrer">Ver repositorio <span>↗</span></a>
         <a class="button secondary" href="#tree">Explorar archivos <span>↓</span></a>
@@ -36,10 +36,11 @@
         <span>TECNOLOGÍAS<b>NIXOS / NIX</b></span>
         <span>ESTADO<b class="green" data-status>EN DESARROLLO</b></span>
       </div>
+      <aside class="hero-preview" aria-label="Resumen de la configuración"><div class="preview-top"><span class="preview-icon">N</span><div><strong>NixOS</strong><span>ENTORNO PERSONAL</span></div><span class="preview-state">ACTIVO</span></div><div class="preview-divider"></div><div class="preview-row"><span>Escritorio</span><strong>Hyprland</strong></div><div class="preview-row"><span>Shell</span><strong>Fish</strong></div><div class="preview-row"><span>Estética</span><strong>Caelestia</strong></div><div class="preview-bottom"><span class="preview-dot"></span> Sistema declarativo · Git</div></aside>
     </section>
     <section class="shell grid-two" id="overview">
       <article class="panel">
-        <div class="panel-heading"><span class="lights"><i></i><i></i><i></i></span><span>README.md</span><span class="panel-label">01 / RESUMEN</span></div>
+        <div class="panel-heading"><span class="heading-icon">01</span><span>Resumen del proyecto</span><span class="panel-label">README.md</span></div>
         <div class="panel-body">
           <p class="section-kicker">01 — SOBRE ESTA CONFIGURACIÓN</p>
           <h2 id="project-title">nixos-config</h2>
@@ -49,7 +50,7 @@
         </div>
       </article>
       <article class="panel terminal-panel">
-        <div class="panel-heading"><span class="lights"><i></i><i></i><i></i></span><span>terminal — 80×24</span><span class="panel-label">TTY1</span></div>
+        <div class="panel-heading"><span class="heading-icon terminal-icon">›_</span><span>Terminal</span><span class="panel-label">TTY1</span></div>
         <div class="terminal-body">
           <p><span class="green">nazukiss@nixos</span>:<span class="blue">~</span>$ nix flake show</p>
           <pre class="ascii" aria-label="Logotipo NixOS">  /\_/\
@@ -78,10 +79,10 @@
     </section>
     <section class="shell section" id="tree">
       <p class="section-kicker">04 — ESTRUCTURA DEL REPOSITORIO NIXOS</p><h2>Explorá la configuración.</h2>
-      <div class="panel tree-panel"><div class="panel-heading"><span class="lights"><i></i><i></i><i></i></span><span>nixos-config/</span><span class="panel-label">EXPLORADOR DE ARCHIVOS</span></div><div id="file-tree" class="file-tree" aria-live="polite"></div></div>
+      <div class="panel tree-panel"><div class="panel-heading"><span class="heading-icon">04</span><span>nixos-config/</span><span class="panel-label">EXPLORADOR DE ARCHIVOS</span></div><div id="file-tree" class="file-tree" aria-live="polite"></div></div>
       <p class="note">Estructura obtenida automáticamente desde la API pública de GitHub. Seleccioná un archivo o carpeta para abrirlo en el repositorio.</p>
     </section>
-    <section class="shell cta-section"><div><p class="section-kicker">END OF TRANSMISSION</p><h2>Consultá la configuración.</h2><p class="muted">Código y documentación en GitHub.</p></div><a class="button primary" data-repo-link href="https://github.com/nazukiss/nixos-config" target="_blank" rel="noreferrer">Abrir GitHub <span>↗</span></a></section>
+    <section class="shell cta-section"><div><p class="section-kicker">SIGUIENTE PASO</p><h2>Consultá la configuración.</h2><p class="muted">Código y documentación en GitHub.</p></div><a class="button primary" data-repo-link href="https://github.com/nazukiss/nixos-config" target="_blank" rel="noreferrer">Abrir GitHub <span>↗</span></a></section>
   </main>
   <footer class="footer shell"><span>© <span id="year"></span> nazukiss</span><span>HECHO CON <span class="green">NIX</span> Y CÓDIGO ABIERTO</span><a href="#home">VOLVER ARRIBA ↑</a></footer>
 </body>
