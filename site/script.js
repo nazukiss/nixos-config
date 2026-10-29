@@ -130,6 +130,8 @@
       .catch(error => {
         console.error("No se pudo cargar el árbol de GitHub:", error);
         showTreeMessage(`No se pudo cargar el árbol: ${error.message}`, true);
+        treeLoadError = error.message;
+        renderStats();
         if (treeHeader) treeHeader.textContent = "UNAVAILABLE";
       });
   }
@@ -137,18 +139,20 @@
   if (cfg.showStats === false) $("#stats").hidden = true;
   const statsGrid = $("#stats-grid");
   let repoMetadata = null;
+  let repoLoadError = null;
   let treeSummary = null;
+  let treeLoadError = null;
   const numberFormat = new Intl.NumberFormat("es-AR");
   const dateFormat = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
 
   function renderStats() {
     const cards = [
-      { label: "STARS", value: repoMetadata ? numberFormat.format(repoMetadata.stargazers_count) : "Cargando…", url: `${repoUrl}/stargazers` },
-      { label: "FORKS", value: repoMetadata ? numberFormat.format(repoMetadata.forks_count) : "Cargando…", url: `${repoUrl}/forks` },
-      { label: "OPEN ISSUES / PRs", value: repoMetadata ? numberFormat.format(repoMetadata.open_issues_count) : "Cargando…", url: `${repoUrl}/issues` },
-      { label: "ARCHIVOS", value: treeSummary ? numberFormat.format(treeSummary.files) : "Cargando…", url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
-      { label: "CARPETAS", value: treeSummary ? numberFormat.format(treeSummary.folders) : "Cargando…", url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
-      { label: "ÚLTIMA ACTUALIZACIÓN", value: repoMetadata ? dateFormat.format(new Date(repoMetadata.pushed_at)) : "Cargando…", url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
+      { label: "STARS", value: repoMetadata ? numberFormat.format(repoMetadata.stargazers_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/stargazers` },
+      { label: "FORKS", value: repoMetadata ? numberFormat.format(repoMetadata.forks_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/forks` },
+      { label: "OPEN ISSUES / PRs", value: repoMetadata ? numberFormat.format(repoMetadata.open_issues_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/issues` },
+      { label: "ARCHIVOS", value: treeSummary ? numberFormat.format(treeSummary.files) : (treeLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
+      { label: "CARPETAS", value: treeSummary ? numberFormat.format(treeSummary.folders) : (treeLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
+      { label: "ÚLTIMA ACTUALIZACIÓN", value: repoMetadata ? dateFormat.format(new Date(repoMetadata.pushed_at)) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
       { label: "COMMITS", value: "Ver historial ↗", url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
       { label: "REPOSITORIO", value: `${username}/${repository}`, url: repoUrl }
     ];
@@ -183,9 +187,8 @@
       })
       .catch(error => {
         console.error("No se pudieron cargar las estadísticas de GitHub:", error);
-        statsGrid.querySelectorAll(".stat-card strong").forEach(el => {
-          if (el.textContent === "Cargando…") el.textContent = "No disponible";
-        });
+        repoLoadError = error.message;
+        renderStats();
         const note = document.createElement("p");
         note.className = "muted stats-error";
         note.textContent = `No se pudieron cargar algunos datos: ${error.message} Podés consultarlos directamente en GitHub.`;
