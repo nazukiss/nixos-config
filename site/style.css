@@ -51,6 +51,9 @@ button { color: inherit; font: inherit; }
 .section-index i { display: block; width: 54px; height: 1px; background: var(--line-strong); }
 .hero-heading h1 { margin: 18px 0 0; font: 500 clamp(3.3rem,6vw,6.3rem)/.9 var(--serif); letter-spacing: -.075em; }
 .hero-heading h1 em { color: var(--blue); font-weight: 500; }
+.hero-title-link { display: inline-block; color: inherit; text-decoration: none; }
+.hero-title-link:hover { text-decoration: underline; text-decoration-color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: .12em; }
+.hero-title-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 5px; }
 .hero-intro { align-self: center; padding: 24px clamp(17px,2.1vw,34px) 20px; min-width: 0; }
 .eyebrow { margin: 0 0 16px; color: #555a60; font: 500 .61rem var(--mono); letter-spacing: .28em; text-transform: uppercase; }
 .hero-description { max-width: 330px; margin: 0; font: 500 clamp(1.05rem,1.5vw,1.32rem)/1.42 var(--serif); letter-spacing: -.025em; }
