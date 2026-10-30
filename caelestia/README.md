@@ -60,6 +60,10 @@ en tiempo de evaluación de Nix (`builtins.replaceStrings`):
 Overrides en `hypr-vars.lua` / `hypr-user.lua`:
 
 - `cursorTheme = "Bibata-Modern-Ice"` — `sweet-cursors` no está en nixpkgs.
+- `kbWindowFullscreen = "SUPER + SHIFT + F"` y
+  `kbWindowBorderedFullscreen = "SUPER + F"` — se intercambiaron los atajos
+  respecto al upstream: `SUPER + F` maximiza con borde y el fullscreen real
+  queda en `SUPER + SHIFT + F`.
 - `input.kb_layout = "es"` — el upstream usa `us`; el sistema usa `es`.
 - `hl.monitor({ ... scale = 1.25 })` — el upstream usa `scale = 1`; las reglas
   de monitor se evalúan en orden y gana la última que coincide.

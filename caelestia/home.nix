@@ -83,6 +83,11 @@ in
           -- `sweet-cursors` is not packaged in nixpkgs; Bibata is the closest
           -- equivalent and is used by both XCURSOR_THEME and `hyprctl setcursor`.
           cursorTheme = "Bibata-Modern-Ice",
+
+          -- Swapped from upstream: SUPER+F now toggles the bordered
+          -- (maximized) fullscreen, and real fullscreen moved to SUPER+SHIFT+F.
+          kbWindowFullscreen = "SUPER + SHIFT + F",
+          kbWindowBorderedFullscreen = "SUPER + F",
       }
     '';
 

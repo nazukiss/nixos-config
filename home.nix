@@ -150,6 +150,7 @@
     kdePackages.kate
     gearlever
     appimage-run
+    spotify
   ];
 
   programs.git = {
@@ -175,7 +176,6 @@
       nd = "sudo nvim /etc/nixos/desktop.nix";
       nhw = "sudo nvim /etc/nixos/hardware.nix";
       nsv = "sudo nvim /etc/nixos/services.nix";
-      ng = "sudo nvim /etc/nixos/gaming.nix";
       np = "sudo nvim /etc/nixos/packages.nix";
       nh = "sudo nvim /etc/nixos/home.nix";
       ns = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
