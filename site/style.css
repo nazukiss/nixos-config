@@ -245,3 +245,211 @@ body.theme-dark .hero-art::after { background: linear-gradient(90deg,rgba(4,10,1
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Japanese editorial direction: washi, sumi, kon and a restrained shu-red seal. */
+:root {
+  --canvas: #f3eee2;
+  --paper: #f8f3e9;
+  --ink: #25241f;
+  --ink-soft: #4d4a42;
+  --muted: #898273;
+  --line: #d8cfbf;
+  --line-strong: #aaa08f;
+  --blue: #293d60;
+  --blue-soft: #e7e8e2;
+  --vermilion: #b94b36;
+  --code: #111c30;
+  --code-line: #29374b;
+  --code-text: #e0e3e7;
+  --green: #7d9676;
+  --serif: "Playfair Display", "Shippori Mincho", Georgia, serif;
+  --sans: "DM Sans", "Noto Sans JP", sans-serif;
+  --mono: "DM Mono", "Noto Sans JP", monospace;
+}
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(ellipse at 50% 100%, transparent 43%, rgba(84,75,57,.045) 44%, rgba(84,75,57,.045) 46%, transparent 47%),
+    radial-gradient(circle at 1px 1px, rgba(77,65,44,.035) .55px, transparent .8px);
+  background-size: 38px 20px, 6px 6px;
+}
+.site-header { background: rgba(243,238,226,.94); border-color: var(--line); }
+.brand { letter-spacing: -.025em; }
+.brand img { filter: saturate(.74); }
+.main-nav { gap: clamp(14px,2.35vw,36px); }
+.main-nav a {
+  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  line-height: 1.15;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: .78rem;
+  letter-spacing: .015em;
+}
+.main-nav a small {
+  margin-top: 3px;
+  color: #9a8f7d;
+  font: 400 .53rem/1.1 "Shippori Mincho", serif;
+  letter-spacing: .17em;
+}
+.main-nav a.active, .main-nav a:hover { color: var(--blue); }
+.main-nav a.active small, .main-nav a:hover small { color: var(--vermilion); }
+.main-nav a::after { background: var(--vermilion); height: 1px; }
+.theme-toggle { border-color: var(--line); color: var(--blue); }
+.github-button {
+  border-color: var(--blue);
+  color: #f8f3e9;
+  background: var(--blue);
+  border-radius: 1px;
+  letter-spacing: .06em;
+}
+.github-button:hover { background: var(--vermilion); border-color: var(--vermilion); }
+.hero { border-color: var(--line); }
+.section-index { color: var(--vermilion); letter-spacing: .12em; }
+.section-index i { background: var(--line-strong); height: 1px; }
+.hero-heading h1 { letter-spacing: -.065em; font-weight: 400; }
+.hero-heading h1 em { color: var(--blue); }
+.hero-intro { position: relative; }
+.hero-intro .eyebrow { color: var(--vermilion); letter-spacing: .24em; }
+.hero-description { font-family: "Shippori Mincho", "Playfair Display", Georgia, serif; font-weight: 400; line-height: 1.55; }
+.arrow-link { color: var(--ink); font-family: var(--sans); letter-spacing: .02em; }
+.arrow-link span { color: var(--vermilion); }
+.hero-tags { color: #817868; letter-spacing: .15em; }
+.hardware-summary { border-left-color: var(--line); }
+.hardware-summary .eyebrow { color: var(--vermilion); }
+.hardware-item { margin-block: 14px; }
+.hardware-icon { color: var(--blue); }
+.hero-art { background: #293d60; }
+.hero-art img { object-position: 51% 50%; }
+.hero-art::after {
+  background: linear-gradient(90deg, rgba(13,24,42,.02), rgba(13,24,42,.05) 45%, rgba(13,24,42,.36));
+}
+.hero-art figcaption {
+  font-family: "Noto Sans JP", var(--mono);
+  letter-spacing: .2em;
+}
+.hero-art figcaption::before {
+  content: "和";
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d36b4e;
+  color: #e8a18a;
+  background: rgba(29,40,58,.36);
+  font: 500 1rem "Shippori Mincho", serif;
+  letter-spacing: 0;
+}
+.editorial-grid { border-color: var(--line); }
+.editorial-grid h2 {
+  font-family: "Shippori Mincho", "Playfair Display", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -.035em;
+}
+.overview-column, .flake-column, .tree-column { border-right-color: var(--line); }
+.overview-copy {
+  color: #5a554b;
+  font-family: "Shippori Mincho", Georgia, serif;
+  line-height: 1.72;
+}
+.feature-list { border-top-color: var(--line); }
+.feature-list li { font-family: "Noto Sans JP", var(--sans); font-size: .72rem; letter-spacing: .01em; }
+.feature-list li span { color: var(--vermilion); }
+.code-window { border-radius: 1px; border-color: #1e2a3b; }
+.code-window-head { border-radius: 0; letter-spacing: .09em; }
+.code-content b { color: #9db6da; }
+.code-content i { color: #d2ad81; }
+.code-source { color: #c18a70; }
+.file-browser { border-radius: 1px; border-color: var(--line); background: rgba(255,255,255,.12); }
+.file-browser-head {
+  border-radius: 0;
+  color: var(--blue);
+  background: #e8e5dc;
+  border-bottom: 1px solid #d7cdbd;
+}
+.file-browser-head .folder-icon { color: var(--vermilion); }
+.copy-tree { border-radius: 0; }
+.tree-entry.folder { color: #344e74; }
+.tree-entry.file { color: #555044; }
+.tree-connector { color: #a49a89; }
+.tree-footer { border-top-color: var(--line); color: var(--vermilion); }
+.desktop-preview { border-radius: 1px; border-color: var(--line); }
+.preview-overlay { border-radius: 0; background: rgba(37,61,96,.9); }
+.pill-list { gap: 6px; }
+.pill-list span {
+  border: 1px solid #d8cfbf;
+  border-radius: 1px;
+  color: #5b554b;
+  background: rgba(255,255,255,.2);
+  font-family: "Noto Sans JP", var(--sans);
+  font-weight: 400;
+  letter-spacing: .02em;
+}
+.pill-list .primary-pill { color: #f7f1e7; background: var(--blue); border-color: var(--blue); }
+.recent-heading h3 { font-family: "Shippori Mincho", Georgia, serif; font-weight: 500; }
+.recent-heading > a { color: var(--vermilion); }
+.commit-item { border-bottom-color: var(--line); }
+.commit-dot { border-color: var(--vermilion); }
+.commit-message { color: #5d584e; }
+.commit-meta { color: #918777; }
+.site-footer { border-top-color: var(--line); }
+.mountain-art { opacity: .96; }
+.footer-quote { gap: 19px; }
+.footer-number { color: var(--vermilion); }
+.japanese {
+  color: #343b48;
+  font-family: "Shippori Mincho", serif;
+  letter-spacing: .2em;
+}
+.footer-quote small { color: #8b7c68; letter-spacing: .2em; }
+.footer-meta { color: #7e7364; letter-spacing: .22em; }
+.footer-bottom { border-top-color: var(--line); color: #8b8375; }
+.footer-bottom a { color: var(--vermilion); }
+
+/* Keep dark mode within the same Japanese palette. */
+body.theme-dark {
+  --canvas: #111b2c;
+  --paper: #18243a;
+  --ink: #eee8dc;
+  --ink-soft: #c6c2b8;
+  --muted: #9b9a91;
+  --line: #34435b;
+  --line-strong: #607089;
+  --blue: #a5badb;
+  --blue-soft: #263750;
+  --vermilion: #e18166;
+  --code: #080f1c;
+  --code-line: #2a3b56;
+  --code-text: #e0e3e7;
+}
+body.theme-dark .site-header { background: rgba(17,27,44,.96); }
+body.theme-dark { background-image:
+  radial-gradient(ellipse at 50% 100%, transparent 43%, rgba(198,180,145,.035) 44%, rgba(198,180,145,.035) 46%, transparent 47%),
+  radial-gradient(circle at 1px 1px, rgba(220,210,190,.025) .55px, transparent .8px);
+  background-size: 38px 20px, 6px 6px;
+}
+body.theme-dark .main-nav a small { color: #9d9a8f; }
+body.theme-dark .hero-art::after { background: linear-gradient(90deg,rgba(4,10,18,.12),rgba(4,10,18,.18) 45%,rgba(4,10,18,.48)); }
+body.theme-dark .overview-copy, body.theme-dark .commit-message { color: #c8c3b7; }
+body.theme-dark .file-browser { background: rgba(255,255,255,.025); }
+body.theme-dark .file-browser-head { color: #c2d1ea; background: #24344c; border-color: #394963; }
+body.theme-dark .tree-entry.file { color: #d1cabc; }
+body.theme-dark .tree-entry.folder { color: #b0c6e6; }
+body.theme-dark .pill-list span { color: #d7cfc1; background: #25334a; border-color: #3c4c65; }
+body.theme-dark .pill-list .primary-pill { color: #f4ede2; background: #344d73; border-color: #344d73; }
+body.theme-dark .japanese { color: #e1d6c5; }
+body.theme-dark .footer-meta, body.theme-dark .footer-quote small, body.theme-dark .footer-number { color: #b3a48e; }
+body.theme-dark .github-button { background: #263d60; border-color: #263d60; color: #f8f3e9; }
+body.theme-dark .github-button:hover { background: var(--vermilion); border-color: var(--vermilion); }
+
+@media (max-width: 760px) {
+  .main-nav a { align-items: flex-start; }
+  .hero-art figcaption::before { top: 18px; left: 18px; }
+  .footer-quote { gap: 12px; }
+}
