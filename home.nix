@@ -153,8 +153,9 @@
     kdePackages.kate
     gearlever
     appimage-run
-    # Spotify is provided by `programs.spicetify` below (patched build), so it
-    # must not be added here as well: both would provide `bin/spotify`.
+    unrar
+    unzip
+    peazip
   ];
 
   programs.git = {
