@@ -156,6 +156,7 @@
     unrar
     unzip
     peazip
+    heroic
   ];
 
   programs.git = {
