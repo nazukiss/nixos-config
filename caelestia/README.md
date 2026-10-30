@@ -65,6 +65,8 @@ Overrides en `hypr-vars.lua` / `hypr-user.lua`:
   respecto al upstream: `SUPER + F` maximiza con borde y el fullscreen real
   queda en `SUPER + SHIFT + F`.
 - `input.kb_layout = "es"` — el upstream usa `us`; el sistema usa `es`.
+- `xwayland.use_nearest_neighbor = false` — Hyprland 0.55 usa nearest-neighbor
+  por defecto para XWayland; se fuerza filtrado bilineal.
 - `hl.monitor({ ... scale = 1.25 })` — el upstream usa `scale = 1`; las reglas
   de monitor se evalúan en orden y gana la última que coincide.
 
@@ -133,6 +135,23 @@ Overrides en `hypr-vars.lua` / `hypr-user.lua`:
 - No se importa la extensión nativa (`caelestiafox`) ni `packages/caelestia-firefox-theme`
   (PKGBUILD de Arch, requiere `/usr/lib/caelestia/`).
 
+## Spotify / Spicetify
+
+- Flake `github:Gerg-L/spicetify-nix` (sigue `nixpkgs-unstable`) y su módulo
+  `homeManagerModules.spicetify`, importado en `home.nix`.
+- Spotify y Spicetify se construyen **ya parcheados**: no hay `spicetify apply`
+  manual. Cambiar tema, sub-tema o extensiones requiere rebuild.
+- Tema: **SpicetifyCat** (`github:Adrien5902/SpicetifyCat`, rev
+  `d9c98a8ba284593a2decc552ee706a4d1a6c8323`). Sub-temas: `Purple` (activo),
+  `Summer_Sky`, `NyanCat`, `Stray`, `Love_is_War`.
+- Extensiones: `adblockify` y `spicyLyrics` (archivo `spicy-lyrics.mjs`).
+- `wayland = true`: Spotify arranca en Wayland nativo en vez de XWayland.
+- `spotify` **no** está en `home.packages`; lo aporta `programs.spicetify`. Si
+  se agrega aparte, ambos proveen `bin/spotify` y el perfil colisiona.
+- `programs.caelestia.cli.settings.theme.enableSpicetify` sigue en `false`: el
+  `color.ini` dinámico de Caelestia no lo lee `spicetify-nix`, y además el tema
+  de SpicetifyCat y el de Caelestia son mutuamente excluyentes.
+
 ## VSCodium
 
 - `VSCodium/User/settings.json`, `VSCodium/User/keybindings.json` y
@@ -196,8 +215,9 @@ aportaba cosas que otras partes usan, quedaron declaradas explícitamente:
 
 ## Después del rebuild
 
-1. Cerrar Firefox antes del switch: Home Manager reescribe
-   `~/.config/mozilla/firefox/profiles.ini` y el perfil debe estar inactivo.
+1. Cerrar Firefox y Spotify antes del switch: Home Manager reescribe
+   `~/.config/mozilla/firefox/profiles.ini` (el perfil debe estar inactivo) y
+   reemplaza el paquete de Spotify (`spicetify-SpicetifyCat`).
 2. Entrar a Hyprland desde SDDM.
 3. Regenerar los colores para que `scheme/current.lua` coincida con el esquema
    que ya existe en `~/.local/state/caelestia/scheme.json`:

@@ -26,6 +26,14 @@
         home-manager.follows = "home-manager";
       };
     };
+
+    # Declarative Spotify: the theme and extensions are applied at build time
+    # (no manual `spicetify apply`). Follows nixpkgs-unstable because the flake
+    # is still experimental; Spotify and the CLI come from the system nixpkgs.
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, ... }: {

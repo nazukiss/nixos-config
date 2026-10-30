@@ -4,6 +4,7 @@
   imports = [
     inputs.caelestia-shell.homeManagerModules.default
     inputs.zen-browser.homeModules.beta
+    inputs.spicetify-nix.homeManagerModules.spicetify
     ./caelestia/home.nix
   ];
 
@@ -32,6 +33,8 @@
       enableFuzzel = true;
       enableBtop = true;
       enableDiscord = false;
+      # `spicetify-nix` owns the Spotify build (theme and extensions are baked
+      # in); the CLI would only write a `color.ini` that nothing reads.
       enableSpicetify = false;
       enablePandora = false;
       enableZed = false;
@@ -150,7 +153,8 @@
     kdePackages.kate
     gearlever
     appimage-run
-    spotify
+    # Spotify is provided by `programs.spicetify` below (patched build), so it
+    # must not be added here as well: both would provide `bin/spotify`.
   ];
 
   programs.git = {
@@ -228,6 +232,43 @@
       isDefault = true;
     };
   };
+
+  # Spotify + Spicetify. Theme and extensions are baked into the Spotify
+  # derivation at build time, so there is no `spicetify apply` to run: any
+  # change here needs a rebuild.
+  #
+  # Caelestia's own Spicetify theming stays disabled in
+  # `programs.caelestia.cli.settings.theme` (`enableSpicetify = false`); this
+  # module owns `~/.config/spicetify` instead, and its theme is static.
+  programs.spicetify =
+    let
+      spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+    in
+    {
+      enable = true;
+
+      # Native Wayland rather than XWayland (`ELECTRON_OZONE_PLATFORM_HINT=auto`
+      # already comes from Caelestia's `hypr/hyprland/env.lua`).
+      wayland = true;
+
+      # SpicetifyCat is a theme, not an extension. Its sub-themes are
+      # `Purple` (default), `Summer_Sky`, `NyanCat`, `Stray` and `Love_is_War`.
+      theme = {
+        name = "SpicetifyCat";
+        src = pkgs.fetchFromGitHub {
+          owner = "Adrien5902";
+          repo = "SpicetifyCat";
+          rev = "d9c98a8ba284593a2decc552ee706a4d1a6c8323";
+          hash = "sha256-o7SPYBaXDhw7niqdg/We1aHmQEQ7GOwy5igmFN+/DNo=";
+        };
+      };
+      colorScheme = "Purple";
+
+      enabledExtensions = with spicePkgs.extensions; [
+        adblockify
+        spicyLyrics
+      ];
+    };
 
   programs.neovim = {
     enable = true;

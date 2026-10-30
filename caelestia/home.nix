@@ -102,6 +102,14 @@ in
           },
       })
 
+      -- Hyprland 0.55 defaults to nearest-neighbor filtering for XWayland
+      -- surfaces; use bilinear (linear) filtering instead.
+      hl.config({
+          xwayland = {
+              use_nearest_neighbor = false,
+          },
+      })
+
       -- The official hyprland.lua uses scale = 1. Monitor rules are matched in
       -- order and the last matching rule wins, so this overrides it.
       hl.monitor({
