@@ -1,7 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 250" preserveAspectRatio="xMidYMax slice">
-<defs><linearGradient id="snow" x2="0" y2="1"><stop stop-color="#faf9f4"/><stop offset="1" stop-color="#b9bdc3"/></linearGradient></defs>
-<path d="M0 250 105 160 190 193 310 55 410 178 520 108 635 205 760 42 870 188 995 100 1105 205 1245 62 1375 190 1480 120 1600 216V250Z" fill="#252b33"/>
-<path d="m205 193 105-138 100 123-48-35-35 9-22-26-30 34-30-6zM650 205 760 42l110 146-64-37-36 7-23-31-34 45-30-4zM1130 210l115-148 130 154-70-43-42 5-23-34-32 41-30-7z" fill="url(#snow)"/>
-<path d="M0 235 175 184 290 224 440 151 565 236 720 170 875 233 1030 165 1185 235 1335 177 1600 230V250H0Z" fill="#606a76"/>
-<path d="M290 224 440 151l-39 57-41-15-35 26-35-4zM720 170l155 63-78-21-35 15-21-19-28 14-35-13zM1030 165l155 70-75-20-42 13-23-16-28 12-35-11z" fill="#e9e9e5" opacity=".65"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 250" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Mount Fuji and stylized waves">
+<rect width="1600" height="250" fill="#f3eee2" opacity=".0"/>
+<path d="M0 250 140 190 285 226 405 165 520 224 710 70 890 222 1015 170 1175 220 1320 160 1460 222 1600 186V250Z" fill="#293d60"/>
+<path d="M555 222 710 70 890 222 800 178 758 193 720 150 682 195 638 181Z" fill="#f1eadb"/>
+<path d="M710 70 748 117 780 153 806 137 830 173 852 162 890 222" fill="none" stroke="#aab7bd" stroke-width="3"/>
+<path d="M0 238Q120 194 250 235T510 235 770 235 1030 235 1290 235 1600 235" fill="none" stroke="#a7b5bd" stroke-width="5"/>
+<g fill="none" stroke="#5b718d" stroke-width="8" stroke-linecap="round">
+ <path d="M0 252Q120 165 240 252T480 252 720 252 960 252 1200 252 1440 252 1680 252"/>
+ <path d="M-70 225Q40 165 150 225T370 225 590 225 810 225 1030 225 1250 225 1470 225 1690 225"/>
+</g>
+<g fill="none" stroke="#d9d4c8" stroke-width="3" opacity=".9"><path d="M0 240q70-50 140 0t140 0 140 0 140 0 140 0 140 0 140 0 140 0 140 0 140 0 140 0 140 0 140 0"/><path d="M100 250q55-35 110 0t110 0 110 0 110 0 110 0 110 0 110 0 110 0 110 0 110 0 110 0"/></g>
 </svg>
