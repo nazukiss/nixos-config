@@ -25,7 +25,7 @@ a { color: inherit; text-decoration: none; }
 button { color: inherit; font: inherit; }
 ::selection { background: var(--blue); color: white; }
 .site-header {
-  min-height: 66px; display: grid; grid-template-columns: minmax(190px,1fr) auto minmax(190px,1fr);
+  min-height: 66px; display: grid; grid-template-columns: minmax(0,1fr) auto;
   align-items: center; gap: 22px; padding: 9px 3.05%; border-bottom: 1px solid var(--line);
   background: var(--canvas); position: relative; z-index: 5;
 }
@@ -178,7 +178,7 @@ body.theme-dark .hero-art::after { background: linear-gradient(90deg,rgba(4,10,1
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 [hidden] { display: none !important; }
 @media (max-width: 1180px) {
-  .site-header { grid-template-columns: auto 1fr auto; }
+  .site-header { grid-template-columns: minmax(0,1fr) auto; }
   .hero { grid-template-columns: minmax(0,1.3fr) minmax(235px,1fr); margin-right: 3.05%; }
   .hero-heading { padding-right: 25px; }
   .hero-intro { padding-inline: 24px; }
@@ -452,4 +452,32 @@ body.theme-dark .github-button:hover { background: var(--vermilion); border-colo
   .main-nav a { align-items: flex-start; }
   .hero-art figcaption::before { top: 18px; left: 18px; }
   .footer-quote { gap: 12px; }
+}
+
+
+/* The top bar is intentionally reduced to the brand and utility controls. */
+.site-header { grid-template-columns: minmax(0,1fr) auto; }
+.site-header .brand { justify-self: start; }
+.site-header .header-actions { grid-column: 2; }
+.brand img {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: none;
+}
+.logo-credit {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(137,130,115,.55);
+  text-underline-offset: 3px;
+}
+.logo-credit:hover { color: var(--vermilion); }
+@media (max-width: 1180px) {
+  .site-header { grid-template-columns: minmax(0,1fr) auto; }
+}
+@media (max-width: 760px) {
+  .site-header { grid-template-columns: minmax(0,1fr) auto; }
+  .site-header .header-actions { grid-column: 2; grid-row: 1; }
+  .logo-credit { flex-basis: 100%; text-align: left; }
 }
