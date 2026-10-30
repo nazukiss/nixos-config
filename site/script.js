@@ -1,275 +1,243 @@
 (() => {
+  "use strict";
+
   const cfg = window.SITE_CONFIG || {};
-  const $ = (s) => document.querySelector(s);
-  const setText = (s, v) => { if (v) document.querySelectorAll(s).forEach(el => el.textContent = v); };
   const username = cfg.username || "nazukiss";
   const repository = cfg.repository || "nixos-config";
-  const project = cfg.projectName || "nixos-config";
   const branch = cfg.branch || "main";
-  const validRepo = Boolean(username && repository && !username.startsWith("YOUR_") && !repository.startsWith("YOUR_"));
+  const repoUrl = "https://github.com/" + encodeURIComponent(username) + "/" + encodeURIComponent(repository);
+  const apiUrl = "https://api.github.com/repos/" + encodeURIComponent(username) + "/" + encodeURIComponent(repository);
+  const $ = (selector, root = document) => root.querySelector(selector);
 
-  // Caché local para conservar datos y reducir consultas a la API de GitHub.
-  async function fetchGitHubJson(url, cacheKey, ttl = 60 * 60 * 1000) {
-    const storageKey = "nixos-config:" + cacheKey;
-    let cached = null;
-    try { const raw = localStorage.getItem(storageKey); if (raw) cached = JSON.parse(raw); } catch (_) {}
-    if (cached && Date.now() - cached.savedAt < ttl) return cached.data;
-    try {
-      const response = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
-      if (!response.ok) {
-        if (response.status === 403 || response.status === 429) {
-          const remaining = response.headers.get("x-ratelimit-remaining");
-          const reset = Number(response.headers.get("x-ratelimit-reset"));
-          const resetText = reset ? " Probá de nuevo después de las " + new Date(reset * 1000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) + "." : "";
-          throw new Error(remaining === "0" || response.status === 429 ? "GitHub agotó temporalmente el límite de consultas de la API." + resetText : "GitHub rechazó la consulta (HTTP " + response.status + ").");
-        }
-        throw new Error("GitHub respondió con el estado " + response.status + ".");
-      }
-      const data = await response.json();
-      try { localStorage.setItem(storageKey, JSON.stringify({ data, savedAt: Date.now() })); } catch (_) {}
-      return data;
-    } catch (error) {
-      if (cached && cached.data !== undefined) { console.warn("Usando datos guardados para " + cacheKey + " porque la consulta falló:", error); return cached.data; }
-      throw error;
+  document.title = cfg.projectName || "nazukiss — NixOS configuration";
+  document.querySelectorAll("[data-repo-link]").forEach(link => { link.href = repoUrl; });
+  document.querySelectorAll("[data-file-link]").forEach(link => {
+    const path = link.dataset.fileLink.split("/").map(encodeURIComponent).join("/");
+    link.href = repoUrl + "/blob/" + encodeURIComponent(branch) + "/" + path;
+  });
+  const commitsLink = $("[data-commits-link]");
+  if (commitsLink) commitsLink.href = repoUrl + "/commits/" + encodeURIComponent(branch);
+  const year = $("#year");
+  if (year) year.textContent = new Date().getFullYear();
+
+  // Fill only values explicitly maintained in site.config.js.
+  const system = cfg.system || {};
+  document.querySelectorAll("[data-system]").forEach(element => {
+    const value = system[element.dataset.system];
+    if (value) element.textContent = value;
+  });
+  document.querySelectorAll("[data-description]").forEach(element => {
+    if (cfg.description) element.textContent = cfg.description;
+  });
+
+  // The editorial light theme is the default; a dark reading mode is optional.
+  const themeButton = $("[data-theme-toggle]");
+  const themeKey = "nazukiss-site-theme";
+  function applyTheme(theme) {
+    const dark = theme === "dark";
+    document.body.classList.toggle("theme-dark", dark);
+    if (themeButton) {
+      themeButton.setAttribute("aria-pressed", String(dark));
+      themeButton.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+      themeButton.querySelector("span").textContent = dark ? "☼" : "☾";
     }
   }
-  const repoUrl = validRepo ? `https://github.com/${encodeURIComponent(username)}/${encodeURIComponent(repository)}` : "https://github.com/";
-  document.title = `${project} // INTERFAZ DE NIXOS`;
-  setText("[data-project]", project); setText("#project-title", project);
-  setText("[data-description]", cfg.description); setText("[data-version]", cfg.version);
-  setText("[data-license]", cfg.license); setText("[data-status]", cfg.status);
-  setText("[data-username]", username); $("#year").textContent = new Date().getFullYear();
-  document.querySelectorAll("[data-repo-link]").forEach(a => { a.href = repoUrl; });
-
-  const tech = $("#tech-list");
-  (cfg.technologies || []).forEach(value => { const span = document.createElement("span"); span.textContent = value; tech.append(span); });
-
-  const sys = cfg.system || {};
-  const sysGrid = $("#system-grid");
-  [["SISTEMA",sys.os],["DISTRIBUCIÓN",sys.distro],["ESCRITORIO",sys.desktop],["INTÉRPRETE",sys.shell],["EQUIPO",sys.hardware]].forEach(([label,value]) => {
-    const card = document.createElement("div"); card.className = "system-card";
-    const small = document.createElement("small"); small.textContent = label;
-    const strong = document.createElement("strong"); strong.textContent = value || "Not configured";
-    card.append(small,strong); sysGrid.append(card);
+  let savedTheme = "light";
+  try { savedTheme = localStorage.getItem(themeKey) || "light"; } catch (_) {}
+  applyTheme(savedTheme);
+  themeButton?.addEventListener("click", () => {
+    const next = document.body.classList.contains("theme-dark") ? "light" : "dark";
+    applyTheme(next);
+    try { localStorage.setItem(themeKey, next); } catch (_) {}
   });
-  document.querySelectorAll("[data-system]").forEach(el => { if (sys[el.dataset.system]) el.textContent = sys[el.dataset.system]; });
 
-  // El árbol se obtiene de la API pública de GitHub; no depende de una lista mantenida a mano.
-  const treeContainer = $("#file-tree");
-  const treeHeader = document.querySelector(".tree-panel .panel-heading .panel-label");
-  const treeUrl = `https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}/git/trees/${encodeURIComponent(branch)}?recursive=1`;
-  const contentsUrl = (path, isFolder) => `${repoUrl}/${isFolder ? "tree" : "blob"}/${encodeURIComponent(branch)}/${path.split("/").map(encodeURIComponent).join("/")}`;
+  async function getJson(url, cacheKey, cacheDuration = 30 * 60 * 1000) {
+    const storageKey = "nazukiss:" + cacheKey;
+    let cached = null;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) cached = JSON.parse(raw);
+    } catch (_) {}
+    if (cached && cached.savedAt && Date.now() - cached.savedAt < cacheDuration) return cached.data;
 
-  function showTreeMessage(message, isError = false) {
-    treeContainer.replaceChildren();
-    const p = document.createElement("p");
-    p.className = "tree-message";
-    p.textContent = message;
-    treeContainer.append(p);
-    if (isError && validRepo) {
-      const link = document.createElement("a");
-      link.className = "text-link";
-      link.href = `${repoUrl}/tree/${encodeURIComponent(branch)}`;
-      link.target = "_blank";
-      link.rel = "noreferrer";
-      link.textContent = "Abrir el repositorio en GitHub ↗";
-      treeContainer.append(link);
+    const response = await fetch(url, {
+      headers: { Accept: "application/vnd.github+json" }
+    });
+    if (!response.ok) {
+      if (response.status === 403 || response.status === 429) {
+        throw new Error("GitHub's public API is temporarily rate-limited.");
+      }
+      throw new Error("GitHub returned HTTP " + response.status + ".");
     }
+    const data = await response.json();
+    try { localStorage.setItem(storageKey, JSON.stringify({ data, savedAt: Date.now() })); } catch (_) {}
+    return data;
+  }
+
+  // Render a shallow, navigable view of the real repository tree.
+  const treeContainer = $("#file-tree");
+  const treeUrl = apiUrl + "/git/trees/" + encodeURIComponent(branch) + "?recursive=1";
+  const makeContentsUrl = (path, isFolder) => {
+    const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+    return repoUrl + "/" + (isFolder ? "tree" : "blob") + "/" + encodeURIComponent(branch) + "/" + encodedPath;
+  };
+
+  function treeMessage(message, error = false) {
+    if (!treeContainer) return;
+    const paragraph = document.createElement("p");
+    paragraph.className = error ? "tree-error" : "tree-loading";
+    paragraph.textContent = message;
+    treeContainer.replaceChildren(paragraph);
   }
 
   function renderTree(entries) {
     const root = { name: repository, path: "", type: "tree", children: new Map() };
-    for (const entry of entries) {
-      if (!entry.path || entry.path.startsWith(".git/")) continue;
+    entries.forEach(entry => {
+      if (!entry.path || entry.path.startsWith(".git/")) return;
       const parts = entry.path.split("/");
-      let node = root;
+      let parent = root;
       parts.forEach((part, index) => {
         const path = parts.slice(0, index + 1).join("/");
-        if (!node.children.has(part)) {
-          node.children.set(part, {
+        if (!parent.children.has(part)) {
+          parent.children.set(part, {
             name: part,
             path,
             type: index === parts.length - 1 ? entry.type : "tree",
             children: new Map()
           });
         } else if (index === parts.length - 1) {
-          node.children.get(part).type = entry.type;
+          parent.children.get(part).type = entry.type;
         }
-        node = node.children.get(part);
+        parent = parent.children.get(part);
       });
-    }
+    });
 
     const rows = [];
-    function visit(parent, depth, ancestors) {
+    function walk(parent, depth) {
       const children = [...parent.children.values()].sort((a, b) => {
         if (a.type !== b.type) return a.type === "tree" ? -1 : 1;
-        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+        return a.name.localeCompare(b.name, "en", { numeric: true, sensitivity: "base" });
       });
       children.forEach((node, index) => {
-        rows.push({ node, depth, last: index === children.length - 1, ancestors });
-        if (node.type === "tree") visit(node, depth + 1, [...ancestors, index === children.length - 1]);
+        rows.push({ node, depth, last: index === children.length - 1 });
+        if (node.type === "tree" && depth < 1) walk(node, depth + 1);
       });
     }
-    visit(root, 0, []);
+    walk(root, 0);
 
     const fragment = document.createDocumentFragment();
-    rows.forEach(({ node, depth, last, ancestors }) => {
+    rows.slice(0, 33).forEach(({ node, depth, last }) => {
       const row = document.createElement("div");
       row.className = "tree-row";
-      const name = document.createElement("a");
-      const isFolder = node.type === "tree";
-      name.className = `tree-name ${isFolder ? "folder" : "file"}`;
-      name.href = contentsUrl(node.path, isFolder);
-      name.target = "_blank";
-      name.rel = "noreferrer";
-      name.style.paddingLeft = `${depth * 20}px`;
-      name.textContent = `${depth ? (last ? "└── " : "├── ") : ""}${isFolder ? "▸ " : ""}${node.name}`;
-      name.setAttribute("aria-label", `${isFolder ? "Carpeta" : "Archivo"}: ${node.path}`);
-      const note = document.createElement("span");
-      note.className = "tree-note";
-      note.textContent = isFolder ? "CARPETA" : "ARCHIVO";
-      row.append(name, note);
+      row.style.paddingLeft = (depth * 13 + 3) + "px";
+      const connector = document.createElement("span");
+      connector.className = "tree-connector";
+      connector.textContent = depth ? (last ? "└" : "├") : "";
+      const link = document.createElement("a");
+      const folder = node.type === "tree";
+      link.className = "tree-entry " + (folder ? "folder" : "file");
+      link.href = makeContentsUrl(node.path, folder);
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = (folder ? "▰ " : "▱ ") + node.name + (folder ? "/" : "");
+      link.title = node.path;
+      row.append(connector, link);
       fragment.append(row);
     });
-    treeContainer.replaceChildren(fragment);
-    if (treeHeader) treeHeader.textContent = `${rows.length} ELEMENTOS`;
-  }
 
-  if (!validRepo) {
-    showTreeMessage("Configurá el usuario y el repositorio para cargar la estructura.", true);
-  } else {
-    showTreeMessage("Consultando la estructura real del repositorio…");
-    fetchGitHubJson(treeUrl, "tree")
-      .then(data => {
-        if (data.truncated) throw new Error("GitHub devolvió una estructura incompleta por el tamaño del repositorio.");
-        if (!Array.isArray(data.tree)) throw new Error("La respuesta de GitHub no contiene una estructura válida.");
-        const files = data.tree.filter(entry => entry.type === "blob").length;
-        const folders = data.tree.filter(entry => entry.type === "tree").length;
-        treeSummary = { files, folders };
-        renderTree(data.tree);
-        renderStats();
-      })
-      .catch(error => {
-        console.error("No se pudo cargar el árbol de GitHub:", error);
-        showTreeMessage(`No se pudo cargar el árbol: ${error.message}`, true);
-        treeLoadError = error.message;
-        renderStats();
-        if (treeHeader) treeHeader.textContent = "NO DISPONIBLE";
-      });
-  }
-
-  if (cfg.showStats === false) $("#stats").hidden = true;
-  const statsGrid = $("#stats-grid");
-  let repoMetadata = null;
-  let repoLoadError = null;
-  let treeSummary = null;
-  let treeLoadError = null;
-  const numberFormat = new Intl.NumberFormat("es-AR");
-  const dateFormat = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
-
-  function renderStats() {
-    const cards = [
-      { label: "ESTRELLAS", value: repoMetadata ? numberFormat.format(repoMetadata.stargazers_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/stargazers` },
-      { label: "BIFURCACIONES", value: repoMetadata ? numberFormat.format(repoMetadata.forks_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/forks` },
-      { label: "INCIDENCIAS ABIERTAS", value: repoMetadata ? numberFormat.format(repoMetadata.open_issues_count) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/issues` },
-      { label: "ARCHIVOS", value: treeSummary ? numberFormat.format(treeSummary.files) : (treeLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
-      { label: "CARPETAS", value: treeSummary ? numberFormat.format(treeSummary.folders) : (treeLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/tree/${encodeURIComponent(branch)}` },
-      { label: "ÚLTIMA ACTUALIZACIÓN", value: repoMetadata ? dateFormat.format(new Date(repoMetadata.pushed_at)) : (repoLoadError ? "No disponible" : "Cargando…"), url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
-      { label: "COMMITS", value: "Ver historial ↗", url: `${repoUrl}/commits/${encodeURIComponent(branch)}` },
-      { label: "REPOSITORIO", value: `${username}/${repository}`, url: repoUrl }
-    ];
-    statsGrid.replaceChildren();
-    cards.forEach(({ label, value, url }) => {
-      const a = document.createElement("a");
-      a.className = "stat-card";
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noreferrer";
-      const small = document.createElement("small");
-      small.textContent = label;
-      const strong = document.createElement("strong");
-      strong.textContent = value;
-      a.append(small, strong);
-      statsGrid.append(a);
-    });
-  }
-
-  renderStats();
-  if (validRepo) {
-    fetchGitHubJson(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}`, "metadata")
-      .then(data => {
-        repoMetadata = data;
-        renderStats();
-      })
-      .catch(error => {
-        console.error("No se pudieron cargar las estadísticas de GitHub:", error);
-        repoLoadError = error.message;
-        renderStats();
-        const note = document.createElement("p");
-        note.className = "muted stats-error";
-        note.textContent = `No se pudieron cargar algunos datos: ${error.message} Podés consultarlos directamente en GitHub.`;
-        statsGrid.append(note);
-      });
-  }
-  const langCard = $("#language-card");
-  const languageChart = $("#language-chart");
-  const languageStatus = $("#language-status");
-  if (cfg.showLanguageStats === false) langCard.hidden = true;
-  else if (validRepo) {
-    languageStatus.textContent = "Consultando los lenguajes detectados por GitHub…";
-    fetchGitHubJson(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(repository)}/languages`, "languages")
-      .then(languages => {
-        const entries = Object.entries(languages).filter(([, bytes]) => Number.isFinite(bytes) && bytes > 0).sort((a, b) => b[1] - a[1]);
-        const total = entries.reduce((sum, [, bytes]) => sum + bytes, 0);
-        languageChart.replaceChildren();
-        if (!entries.length || !total) {
-          languageStatus.textContent = "GitHub todavía no informa lenguajes para este repositorio.";
-          return;
-        }
-        languageStatus.textContent = "Distribución según los bytes de código detectados por GitHub; no representa porcentajes exactos de tiempo o esfuerzo.";
-        entries.forEach(([name, bytes]) => {
-          const percent = bytes / total * 100;
-          const row = document.createElement("div");
-          row.className = "language-row";
-          const meta = document.createElement("div");
-          meta.className = "language-meta";
-          const label = document.createElement("span");
-          label.textContent = name;
-          const value = document.createElement("span");
-          value.textContent = `${percent.toLocaleString("es-AR", { maximumFractionDigits: 1 })}%`;
-          const track = document.createElement("div");
-          track.className = "language-track";
-          track.setAttribute("role", "img");
-          track.setAttribute("aria-label", `${name}: ${percent.toFixed(1)} por ciento`);
-          const bar = document.createElement("div");
-          bar.className = "language-bar";
-          bar.style.width = `${percent}%`;
-          track.append(bar);
-          meta.append(label, value);
-          row.append(meta, track);
-          languageChart.append(row);
-        });
-      })
-      .catch(error => {
-        console.error("No se pudo cargar la distribución de lenguajes:", error);
-        languageStatus.textContent = `No se pudo cargar la distribución: ${error.message} Podés consultar los lenguajes en GitHub.`;
-      });
-  } else {
-    languageStatus.textContent = "Configurá el usuario y el repositorio para mostrar las estadísticas.";
-  }
-
-  const lines = ["nix flake show","git status","sudo nixos-rebuild switch --flake .#<hostname>"];
-  const typed = $("#typed-text");
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) typed.textContent = lines[0];
-  else {
-    let line=0,char=0,deleting=false;
-    function tick() {
-      const current=lines[line]; typed.textContent=current.slice(0,char);
-      if (!deleting && char<current.length) { char++; setTimeout(tick,48); }
-      else if (!deleting) { deleting=true; setTimeout(tick,1150); }
-      else if (char>0) { char--; setTimeout(tick,22); }
-      else { deleting=false; line=(line+1)%lines.length; setTimeout(tick,280); }
+    if (rows.length > 33) {
+      const more = document.createElement("p");
+      more.className = "tree-loading";
+      more.textContent = "+ " + (rows.length - 33) + " more entries in GitHub";
+      fragment.append(more);
     }
-    tick();
+    treeContainer.replaceChildren(fragment);
   }
+
+  if (treeContainer) {
+    treeMessage("Reading the repository tree…");
+    getJson(treeUrl, "tree")
+      .then(data => {
+        if (data.truncated || !Array.isArray(data.tree)) throw new Error("GitHub returned an incomplete repository tree.");
+        renderTree(data.tree);
+      })
+      .catch(error => {
+        console.error("Could not load repository tree:", error);
+        treeMessage(error.message + " Open the repository to browse the files.", true);
+      });
+  }
+
+  // Recent commit titles, abbreviated hashes and relative dates come from GitHub.
+  const commitContainer = $("#commit-list");
+  const commitsUrl = apiUrl + "/commits?per_page=4";
+  const relativeTime = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  function formatRelativeDate(value) {
+    if (!value) return "";
+    const seconds = Math.round((new Date(value).getTime() - Date.now()) / 1000);
+    const ranges = [
+      ["year", 31536000], ["month", 2592000], ["week", 604800],
+      ["day", 86400], ["hour", 3600], ["minute", 60]
+    ];
+    for (const [unit, size] of ranges) {
+      if (Math.abs(seconds) >= size) return relativeTime.format(Math.round(seconds / size), unit);
+    }
+    return relativeTime.format(0, "minute");
+  }
+
+  function renderCommits(commits) {
+    const fragment = document.createDocumentFragment();
+    commits.forEach(item => {
+      const row = document.createElement("a");
+      row.className = "commit-item";
+      row.href = repoUrl + "/commit/" + item.sha;
+      row.target = "_blank";
+      row.rel = "noreferrer";
+      row.title = item.commit?.message || "Open commit";
+      const dot = document.createElement("span");
+      dot.className = "commit-dot";
+      const message = document.createElement("span");
+      message.className = "commit-message";
+      message.textContent = (item.commit?.message || "Commit").split("\n")[0];
+      const meta = document.createElement("span");
+      meta.className = "commit-meta";
+      const date = item.commit?.author?.date || item.commit?.committer?.date;
+      meta.textContent = item.sha.slice(0, 7) + " · " + formatRelativeDate(date);
+      row.append(dot, message, meta);
+      fragment.append(row);
+    });
+    commitContainer.replaceChildren(fragment);
+  }
+
+  if (commitContainer) {
+    getJson(commitsUrl, "commits", 10 * 60 * 1000)
+      .then(data => {
+        if (!Array.isArray(data) || !data.length) throw new Error("No recent commits were returned.");
+        renderCommits(data);
+      })
+      .catch(error => {
+        console.error("Could not load recent commits:", error);
+        const message = document.createElement("p");
+        message.className = "tree-error";
+        message.textContent = "Recent activity is temporarily unavailable.";
+        commitContainer.replaceChildren(message);
+      });
+  }
+
+  // Copy the conventional local configuration path.
+  const copyButton = $("[data-copy-tree]");
+  copyButton?.addEventListener("click", async () => {
+    const originalLabel = copyButton.getAttribute("aria-label");
+    try {
+      await navigator.clipboard.writeText("/etc/nixos");
+      copyButton.setAttribute("aria-label", "Copied /etc/nixos");
+      copyButton.textContent = "✓";
+    } catch (_) {
+      copyButton.setAttribute("aria-label", "Copy is unavailable in this browser");
+      copyButton.textContent = "!";
+    }
+    window.setTimeout(() => {
+      copyButton.textContent = "▢";
+      copyButton.setAttribute("aria-label", originalLabel || "Copy repository path");
+    }, 1600);
+  });
 })();
