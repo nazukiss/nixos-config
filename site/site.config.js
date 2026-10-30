@@ -1,22 +1,22 @@
-// Configuración de la portada de nazukiss/nixos-config.
+// Public-facing details for the nazukiss NixOS project site.
 window.SITE_CONFIG = {
   username: "nazukiss",
   repository: "nixos-config",
-  projectName: "nixos-config",
+  projectName: "nazukiss — NixOS configuration",
   branch: "main",
-  tagline: "NixOS • Hyprland • Linux declarativo",
-  description: "Mi configuración personal de NixOS: sistema declarativo, entorno Hyprland con Caelestia, herramientas de terminal y configuración del entorno de escritorio.",
-  status: "EN DESARROLLO",
-  version: "rolling",
-  license: "Sin especificar",
-  technologies: ["NixOS", "Nix Flakes", "Hyprland", "Caelestia", "Fish", "Git"],
+  description: "My declarative NixOS configuration — documented, versioned and reproducible.",
+  status: "IN DEVELOPMENT",
+  version: "26.05",
+  technologies: ["NixOS", "Nix Flakes", "Hyprland", "Caelestia", "Home Manager", "Fish"],
   system: {
-    os: "NixOS",
+    os: "NixOS 26.05",
     distro: "NixOS Linux",
     desktop: "Hyprland + Caelestia",
     shell: "Fish",
-    hardware: "Lenovo Legion 5 15ACH6H • Ryzen 7 5800H • RTX 3060 Laptop"
-  },
-  showStats: true,
-  showLanguageStats: true
+    laptop: "Lenovo Legion 5 15ACH6H",
+    cpu: "AMD Ryzen 7 5800H",
+    gpu: "NVIDIA GeForce RTX 3060",
+    memory: "16 GB RAM",
+    hardware: "Lenovo Legion 5 15ACH6H"
+  }
 };
