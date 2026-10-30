@@ -4,7 +4,7 @@ window.SITE_CONFIG = {
   repository: "nixos-config",
   projectName: "nazukiss — NixOS configuration",
   branch: "main",
-  description: "My declarative NixOS configuration — documented, versioned and reproducible.",
+  description: "Tech for Palestine builds and scales initiatives for Palestinian liberation. Join the community, volunteer your skills, or support their work.",
   status: "IN DEVELOPMENT",
   version: "26.05",
   technologies: ["NixOS", "Nix Flakes", "Hyprland", "Caelestia", "Home Manager", "Fish"],
